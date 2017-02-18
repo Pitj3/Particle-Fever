@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using GlmNet;
 
 namespace Particle_Fever
 {
@@ -16,7 +15,6 @@ namespace Particle_Fever
         private uint _bpp;
         private uint _width, _height;
         private uint _id;
-        private uint _type;
 
         public ScreenBuffer(uint width, uint height, uint flag, uint bpp)
         {
@@ -24,9 +22,14 @@ namespace Particle_Fever
             _height = height;
             _bpp = bpp;
 
-            Logger.log(LogLevel.DEBUG, "Creating empty screen buffer of (" + width + " * " + height + ")");
+            Logger.Log(LogLevel.DEBUG, "Creating empty screen buffer of (" + width + " * " + height + ")");
 
             _imageData = new ushort[_width * _height * _bpp];
+
+            for(uint i = 0; i < _width * _height * _bpp; i++)
+            {
+                _imageData[i] = 0;
+            }
 
             _id = (uint)GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, _id);
@@ -42,12 +45,12 @@ namespace Particle_Fever
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, flag);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, flag);
 
-            Logger.log(LogLevel.DEBUG, "Finished creating screen buffer");
+            Logger.Log(LogLevel.DEBUG, "Finished creating screen buffer");
         }
 
-        public vec4 getPixel(uint x, uint y)
+        public Vector4 GetPixel(uint x, uint y)
         {
-            vec4 r = new vec4();
+            Vector4 r = new Vector4();
 
             GL.BindTexture(TextureTarget.Texture2D, _id);
 
@@ -56,25 +59,47 @@ namespace Particle_Fever
 
             int startAddressOfPixel = (int)(((y * _width) + x) * _bpp);
 
-            r.x = buffer[startAddressOfPixel + 2];
-            r.y = buffer[startAddressOfPixel + 1];
-            r.z = buffer[startAddressOfPixel + 0];
-            r.w = buffer[startAddressOfPixel + 3];
+            r.X = buffer[startAddressOfPixel + 2];
+            r.Y = buffer[startAddressOfPixel + 1];
+            r.Z = buffer[startAddressOfPixel + 0];
+            r.W = buffer[startAddressOfPixel + 3];
 
             return r;
         }
 
-        public void beginRender()
+        public void SetPixel(uint x, uint y, uint color)
+        {
+            int r = ((int)color >> 16) & 0xFF;
+            int g = ((int)color >> 8) & 0xFF;
+            int b = ((int)color >> 0) & 0xFF;
+
+            if (x >= _width || x < 0 || y < 0 || y >= _height)
+            {
+                return;
+            }
+
+            _imageData[y * (_width * _bpp) + x * _bpp + 0] = (ushort)r;
+            _imageData[y * (_width * _bpp) + x * _bpp + 1] = (ushort)g;
+            _imageData[y * (_width * _bpp) + x * _bpp + 2] = (ushort)b;
+            _imageData[y * (_width * _bpp) + x * _bpp + 3] = (ushort)255;
+        }
+
+        public void OnBeginRenderFrame()
         {
             GL.Viewport(0, 0, (int)_width, (int)_height);
         }
 
-        public void endRender()
+        public void OnEndRenderFrame()
         {
             GL.BindTexture(TextureTarget.Texture2D, _id);
-            GL.CopyTexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, 0, 0, (int)_width, (int)_height, 0);
-
-            GL.Viewport(0, 0, (int)Program.game.windowSize.X, (int)Program.game.windowSize.Y);
+            if (_bpp == 4) // has alpha
+            {
+                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, (int)_width, (int)_height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, _imageData);
+            }
+            else
+            {
+                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, (int)_width, (int)_height, 0, PixelFormat.Rgb, PixelType.UnsignedByte, _imageData);
+            }
         }
     }
 }

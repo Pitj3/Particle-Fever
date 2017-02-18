@@ -27,6 +27,8 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -55,16 +57,24 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GlmNet, Version=0.5.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\GlmNet.0.5.1.0\lib\net40\GlmNet.dll</HintPath>
+    <Reference Include="Gwen, Version=3.0.6001.172, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Gwen.3.0.6001.172\lib\net40\Gwen.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Gwen.Renderer.OpenTK, Version=3.0.6001.430, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Gwen.Renderer.OpenTK.3.0.6001.430\lib\net40\Gwen.Renderer.OpenTK.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="log4net, Version=2.0.7.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.7\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="OpenTK, Version=2.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <HintPath>..\packages\OpenTK.2.0.0\lib\net20\OpenTK.dll</HintPath>
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.Next.1.1.1616.8959\lib\net20\OpenTK.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="QuickFont, Version=4.0.6000.41401, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\QuickFont.Desktop.4.0.6000.41401\lib\net40\QuickFont.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SharpDX, Version=3.1.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
@@ -107,14 +117,12 @@
     <Compile Include="Core\Input.cs" />
     <Compile Include="Core\Logger.cs" />
     <Compile Include="Core\PrimitiveRenderer.cs" />
-    <Compile Include="Particle.cs" />
+    <Compile Include="Graphics\GLRenderer.cs" />
+    <Compile Include="Interface\InterfaceManager.cs" />
+    <Compile Include="Simulation\Controller.cs" />
+    <Compile Include="Simulation\Particle.cs" />
     <Compile Include="Core\ParticleGame.cs" />
     <Compile Include="Core\GameTime.cs" />
-    <Compile Include="GLFW\Glfw.cs" />
-    <Compile Include="GLFW\Glfw.Delegate.cs" />
-    <Compile Include="GLFW\Glfw.Enum.cs" />
-    <Compile Include="GLFW\Glfw.Func.cs" />
-    <Compile Include="GLFW\Glfw.Struct.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -125,11 +133,16 @@
     <Compile Include="Graphics\ScreenBuffer.cs" />
     <Compile Include="Graphics\Shader.cs" />
     <Compile Include="Core\Timer.cs" />
+    <Compile Include="Simulation\Simulation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="default.fs" />
-    <None Include="default.vs" />
+    <None Include="Content\default.fs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Content\default.vs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -149,11 +162,26 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\DefaultSkin.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\image.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
+  <Import Project="..\packages\OpenTK.Next.1.1.1616.8959\build\OpenTK.Next.targets" Condition="Exists('..\packages\OpenTK.Next.1.1.1616.8959\build\OpenTK.Next.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\OpenTK.Next.1.1.1616.8959\build\OpenTK.Next.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenTK.Next.1.1.1616.8959\build\OpenTK.Next.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

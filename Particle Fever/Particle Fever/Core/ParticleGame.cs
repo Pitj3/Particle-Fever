@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
 
 namespace Particle_Fever
 {
@@ -17,19 +18,28 @@ namespace Particle_Fever
         private string _title = "";
         private bool _isRunning = false;
 
-        // Camera variables
-        private Matrix4 _projection = Matrix4.Identity;
-        private Matrix4 _view = Matrix4.Identity;
-
         // Screen variables
         private ScreenBuffer _screenBuffer;
-        private QuadPrimitive _quad;
+        private QuadPrimitive _screenQuad;
 
-        // Shaders
+        // Shader variables
         private Shader _defaultShader;
-        private int mvpLoc;
+        private int _mvpLoc;
+        private int _diffuseLoc;
 
-        public ParticleGame(uint width, uint height, string title)
+        // Simulation variables
+        private Simulation _sim;
+
+        // Timing variables
+        private Timer _timer = new Timer();
+
+        // Controller variables
+        private Controller _controller;
+
+        // Interface variables
+        private InterfaceManager _interface;
+
+        public ParticleGame(uint width, uint height, string title) : base((int)width, (int)height)
         {
             Logger log = new Logger();
 
@@ -40,38 +50,57 @@ namespace Particle_Fever
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            Logger.log(LogLevel.INFO, "Initializing game");
+            Logger.Log(LogLevel.INFO, "Initializing game");
 
             Title = _title;
-            Size = new Size((int)_windowSize.X, (int)_windowSize.Y);
-
-            _projection = Matrix4.CreateOrthographic(_windowSize.X, _windowSize.Y, -10, 10);
-            _view = Matrix4.Identity;
 
             _screenBuffer = new ScreenBuffer((uint)_windowSize.X, (uint)_windowSize.Y, (uint)TextureMinFilter.Linear, 4);
 
-            GL.Disable(EnableCap.DepthTest);
-            GL.Enable(EnableCap.Texture2D);
-            GL.Disable(EnableCap.CullFace);
+            GL.ClearColor(Color.MidnightBlue);
+            GLRenderer.Initialize();
 
             // load content
 
-            _defaultShader = new Shader("default");
-            _quad = new QuadPrimitive(0, 0, (uint)_windowSize.X, (uint)_windowSize.Y);
+            _defaultShader = new Shader("Content/default");
+            _mvpLoc = _defaultShader.GetVariableLocation("mvp");
+            _diffuseLoc = _defaultShader.GetVariableLocation("diffuse");
 
-            mvpLoc = _defaultShader.getVariableLocation("mvp");
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.Uniform1(_diffuseLoc, 0);
+
+            _sim = new Simulation();
+
+            _screenQuad = new QuadPrimitive(0, 0, (uint)_windowSize.X, (uint)_windowSize.Y);
+
+            for(uint i = 20; i < 200; i++)
+            {
+                _screenBuffer.SetPixel(i, 200, 0xFF00FFFF);
+            }
+
+            _controller = new Controller();
+
+            _interface = new InterfaceManager();
+            _interface.OnLoad(e);
+
+            Input.OnLoad(e);
 
             // end load content
             isRunning = true;
 
-            Logger.log(LogLevel.INFO, "Done initializing game");
+            Logger.Log(LogLevel.INFO, "Done initializing game");
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             base.OnUpdateFrame(e);
 
-            if (Input.isPressed(SharpDX.DirectInput.Key.Escape)) // TODO: Move to OpenTK input
+            Input.OnUpdateFrame(e);
+
+            _interface.OnUpdateFrame(e);
+            _controller.OnUpdateFrame(e);
+            _sim.OnUpdateFrame(e);
+
+            if (Input.IsKeyPressed(Key.Escape))
                 Close();
         }
 
@@ -79,27 +108,50 @@ namespace Particle_Fever
         {
             base.OnRenderFrame(e);
 
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            GL.ClearColor(1, 1, 1, 1);
+            GLRenderer.OnBeginRenderFrame();
 
-            _defaultShader.bind();
+            _controller.OnRenderFrame(e);
+            Input.OnRenderFrame(e);
 
-            Matrix4 mvp = _projection;
-            GL.UniformMatrix4(mvpLoc, false, ref mvp);
+            // Begin rendering to screenbuffer
+            _screenBuffer.OnBeginRenderFrame();
 
-            _quad.render();
+            // render particles
+            for (uint i = 20; i < 200; i++)
+            {
+                _screenBuffer.SetPixel(i, 200, 0xFFFFFFFF);
+            }
 
-            _defaultShader.unbind();
-        
+            _sim.OnRenderFrame(e);
 
-            SwapBuffers();
+            _screenBuffer.OnEndRenderFrame();
+            // End rendering to screenbuffer
+
+            // Render screenquad with screenbuffer texture
+            _defaultShader.Bind();
+
+            Matrix4 mvp = GLRenderer.Projection;
+            GL.UniformMatrix4(_mvpLoc, false, ref mvp);
+
+            _screenQuad.OnRenderFrame();
+
+            _defaultShader.Unbind();
+            // End render screenquad
+
+            // Render interface
+            _interface.OnRenderFrame(e);
+
+            GLRenderer.OnEndRenderFrame();
         }
 
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
 
-            windowSize = new Vector2(ClientRectangle.Width, ClientRectangle.Height);
+            GLRenderer.OnResize(e);
+            _interface.OnResize(e);
+
+            windowSize = new Vector2(Width, Height);
         }
 
         public bool isRunning
@@ -122,8 +174,6 @@ namespace Particle_Fever
             }
             set
             {
-                GL.Viewport(0, 0, ClientRectangle.Width, ClientRectangle.Height);
-                _projection = Matrix4.CreateOrthographicOffCenter(0, ClientRectangle.Width, ClientRectangle.Height, 0, -10, 10);
                 _windowSize = value;
             }
         }

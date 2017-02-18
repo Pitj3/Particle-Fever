@@ -30,17 +30,17 @@ namespace Particle_Fever
             }
         }
 
-        public void start()
+        public void Start()
         {
             QueryPerformanceCounter(out _start);
         }
 
-        public void stop()
+        public void Stop()
         {
             QueryPerformanceCounter(out _stop);
         }
 
-        public double duration(int iterations = 1)
+        public double Duration(int iterations = 1)
         {
             return ((((double)(_stop - _start) * (double)_multiplier) / (double)_frequency) / iterations);
         }

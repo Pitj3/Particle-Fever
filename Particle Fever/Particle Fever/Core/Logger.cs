@@ -26,7 +26,7 @@ namespace Particle_Fever
             _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         }
 
-        public static void log(LogLevel level, string text)
+        public static void Log(LogLevel level, string text)
         {
             switch(level)
             {

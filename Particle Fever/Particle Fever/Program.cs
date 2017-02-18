@@ -10,40 +10,25 @@ namespace Particle_Fever
 {
     class Program
     {
-        public static ParticleGame game;
+        private static ParticleGame _game = null;
+
+        public static ParticleGame Game
+        {
+            get
+            {
+                return _game;
+            }
+
+            set
+            {
+                _game = value;
+            }
+        }
+
         static void Main(string[] args)
         {
-            Input input = new Input();
-
-            /*game = new ParticleGame();
-            game.createScreen(1280, 720, "Particle Fever");
-
-            game.initialize();
-
-            Timer timer = new Timer();
-
-            while(game.isRunning)
-            {
-                timer.start();
-
-                Input.poll();
-
-                game.update(GameTime.deltaTime);
-                game.render();
-
-                if (Input.isPressed(Key.Escape))
-                    game.isRunning = false;
-
-                timer.stop();
-                GameTime.deltaTime = timer.duration() / Constants.toSeconds; // move somewhere else
-            }
-
-            game.unload();*/
-
-            using (ParticleGame game = new ParticleGame(1280, 720, "Particle Fever"))
-            {
-                game.Run(60);
-            }
+            Game = new ParticleGame(1280, 720, "Particle Fever");
+            Game.Run(60);
         }
     }
 }

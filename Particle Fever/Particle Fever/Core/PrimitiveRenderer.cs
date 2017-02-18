@@ -12,7 +12,8 @@ namespace Particle_Fever
     public class QuadPrimitive
     {
         uint vao;
-        uint vbo;
+        uint vboPos;
+        uint vboUv;
         public QuadPrimitive(uint x, uint y, uint width, uint height)
         {
             float[] data = new float[12]
@@ -23,21 +24,38 @@ namespace Particle_Fever
                 (float)x, (float)(y + height), 0
             };
 
+            float[] uvData = new float[8]
+            {
+                0.0f, 0.0f,
+                1.0f, 0.0f,
+                1.0f, 1.0f,
+                0.0f, 1.0f
+            };
+
             vao = (uint)GL.GenVertexArray();
             GL.BindVertexArray(vao);
-            vbo = (uint)GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * 12, data, BufferUsageHint.StaticDraw);
+
+            vboPos = (uint)GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vboPos);
+            GL.BufferData<float>(BufferTarget.ArrayBuffer, new IntPtr(sizeof(float) * 12), data, BufferUsageHint.StaticDraw);
+
+            vboUv = (uint)GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vboUv);
+            GL.BufferData<float>(BufferTarget.ArrayBuffer, new IntPtr(sizeof(float) * 8), uvData, BufferUsageHint.StaticDraw);
+
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.BindVertexArray(0);
         }
 
-        public void render()
+        public void OnRenderFrame()
         {
             GL.BindVertexArray(vao);
             GL.EnableVertexAttribArray(0);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vboPos);
             GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
+            GL.EnableVertexAttribArray(1);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vboUv);
+            GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 0, 0);
             GL.DrawArrays(PrimitiveType.Quads, 0, 4);
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.DisableVertexAttribArray(0);
@@ -47,7 +65,7 @@ namespace Particle_Fever
 
     public static class PrimitiveRenderer
     {
-        public static void renderBox(uint x, uint y, uint width, uint height)
+        public static void RenderBox(uint x, uint y, uint width, uint height)
         {
             GL.PushMatrix();
             GL.Translate((double)x, (double)y, 0.0);

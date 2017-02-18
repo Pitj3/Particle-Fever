@@ -8,6 +8,19 @@ namespace Particle_Fever
 {
     public class GameTime
     {
-        public static double deltaTime = 0.0;
+        private static double _deltaTime = 0.0;
+
+        public static double DeltaTime
+        {
+            get
+            {
+                return _deltaTime;
+            }
+
+            set
+            {
+                _deltaTime = value;
+            }
+        }
     }
 }

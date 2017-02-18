@@ -21,7 +21,7 @@ namespace Particle_Fever
 
             if (!File.Exists(filepath + ".vs"))
             {
-                Logger.log(LogLevel.ERROR, "Shader not found at location: " + filepath);
+                Logger.Log(LogLevel.ERROR, "Shader not found at location: " + filepath);
             }
             else
             {
@@ -32,7 +32,7 @@ namespace Particle_Fever
             }
             if (!File.Exists(filepath + ".fs"))
             {
-                Logger.log(LogLevel.ERROR, "Shader not found at location: " + filepath);
+                Logger.Log(LogLevel.ERROR, "Shader not found at location: " + filepath);
             }
             else
             {
@@ -51,7 +51,7 @@ namespace Particle_Fever
             int vertLogLength = 0;
             StringBuilder outVertLog = new StringBuilder();
             GL.GetShaderInfoLog(vertShader, 1024, out vertLogLength, outVertLog);
-            if (vertLogLength > 1) Logger.log(LogLevel.ERROR, outVertLog.ToString());
+            if (vertLogLength > 1) Logger.Log(LogLevel.ERROR, outVertLog.ToString());
 
             GL.ShaderSource((int)fragShader, fsSource);
             GL.CompileShader(fragShader);
@@ -59,7 +59,7 @@ namespace Particle_Fever
             int fragLogLength = 0;
             StringBuilder outFragLog = new StringBuilder();
             GL.GetShaderInfoLog(vertShader, 1024, out fragLogLength, outFragLog);
-            if (vertLogLength > 1) Logger.log(LogLevel.ERROR, outFragLog.ToString());
+            if (vertLogLength > 1) Logger.Log(LogLevel.ERROR, outFragLog.ToString());
 
             _program = (uint)GL.CreateProgram();
             GL.AttachShader(_program, vertShader);
@@ -69,28 +69,28 @@ namespace Particle_Fever
             int programLogLength = 0;
             StringBuilder programLog = new StringBuilder();
             GL.GetProgramInfoLog(_program, 1024, out programLogLength, programLog);
-            if (programLogLength > 1) Logger.log(LogLevel.ERROR, programLog.ToString());
+            if (programLogLength > 1) Logger.Log(LogLevel.ERROR, programLog.ToString());
 
             GL.DeleteShader(vertShader);
             GL.DeleteShader(fragShader);
         }
 
-        public void bind()
+        public void Bind()
         {
             GL.UseProgram(_program);
         }
 
-        public void unbind()
+        public void Unbind()
         {
             GL.UseProgram(0);
         }
 
-        public int getVariableLocation(string name)
+        public int GetVariableLocation(string name)
         {
             return GL.GetUniformLocation(_program, name);
         }
 
-        public uint program
+        public uint Program
         {
             get
             {
