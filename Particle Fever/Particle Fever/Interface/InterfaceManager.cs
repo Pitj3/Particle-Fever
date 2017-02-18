@@ -101,7 +101,7 @@ namespace Particle_Fever
         private void LoadElementCatagories()
         {
             Gwen.Control.Button _powdersButton = new Gwen.Control.Button(_sideMenuBox);
-
+            _powdersButton.Font = _powdersButton.Font.Copy();
             _powdersButton.Font.Size = 8;
             _powdersButton.SetSize(80, 20);
             _powdersButton.SetToolTipText("Powders");
@@ -112,6 +112,7 @@ namespace Particle_Fever
 
             Gwen.Control.Button _liquidsButton = new Gwen.Control.Button(_sideMenuBox);
 
+            _liquidsButton.Font = _liquidsButton.Font.Copy();
             _liquidsButton.Font.Size = 8;
             _liquidsButton.SetSize(80, 20);
             _liquidsButton.SetToolTipText("Liquids");
@@ -169,6 +170,8 @@ namespace Particle_Fever
                     break;
                 }
             }
+
+            _canvas.NeedsRedraw = true;
         }
 
         private void LoadLiquids()
