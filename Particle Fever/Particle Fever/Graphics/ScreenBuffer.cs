@@ -11,7 +11,7 @@ namespace Particle_Fever
 {
     public class ScreenBuffer
     {
-        private ushort[] _imageData;
+        private byte[] _imageData;
         private uint _bpp;
         private uint _width, _height;
         private uint _id;
@@ -24,7 +24,7 @@ namespace Particle_Fever
 
             Logger.Log(LogLevel.DEBUG, "Creating empty screen buffer of (" + width + " * " + height + ")");
 
-            _imageData = new ushort[_width * _height * _bpp];
+            _imageData = new byte[_width * _height * _bpp];
 
             for(uint i = 0; i < _width * _height * _bpp; i++)
             {
@@ -54,7 +54,7 @@ namespace Particle_Fever
 
             GL.BindTexture(TextureTarget.Texture2D, _id);
 
-            ushort[] buffer = new ushort[_width * _height * _bpp];
+            byte[] buffer = new byte[_width * _height * _bpp];
             GL.GetTexImage(TextureTarget.Texture2D, 0, PixelFormat.Bgra, PixelType.UnsignedByte, buffer);
 
             int startAddressOfPixel = (int)(((y * _width) + x) * _bpp);
@@ -78,10 +78,23 @@ namespace Particle_Fever
                 return;
             }
 
-            _imageData[y * (_width * _bpp) + x * _bpp + 0] = (ushort)r;
-            _imageData[y * (_width * _bpp) + x * _bpp + 1] = (ushort)g;
-            _imageData[y * (_width * _bpp) + x * _bpp + 2] = (ushort)b;
-            _imageData[y * (_width * _bpp) + x * _bpp + 3] = (ushort)255;
+            _imageData[y * (_width * _bpp) + x * _bpp + 0] = (byte)r;
+            _imageData[y * (_width * _bpp) + x * _bpp + 1] = (byte)g;
+            _imageData[y * (_width * _bpp) + x * _bpp + 2] = (byte)b;
+            _imageData[y * (_width * _bpp) + x * _bpp + 3] = (byte)255;
+        }
+
+        public void ClearPixel(uint x, uint y)
+        {
+            if (x >= _width || x < 0 || y < 0 || y >= _height)
+            {
+                return;
+            }
+
+            _imageData[y * (_width * _bpp) + x * _bpp + 0] = (byte)0;
+            _imageData[y * (_width * _bpp) + x * _bpp + 1] = (byte)0;
+            _imageData[y * (_width * _bpp) + x * _bpp + 2] = (byte)0;
+            _imageData[y * (_width * _bpp) + x * _bpp + 3] = (byte)255;
         }
 
         public void OnBeginRenderFrame()

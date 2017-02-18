@@ -120,6 +120,7 @@
     <Compile Include="Graphics\GLRenderer.cs" />
     <Compile Include="Interface\InterfaceManager.cs" />
     <Compile Include="Simulation\Controller.cs" />
+    <Compile Include="Simulation\Element.cs" />
     <Compile Include="Simulation\Particle.cs" />
     <Compile Include="Core\ParticleGame.cs" />
     <Compile Include="Core\GameTime.cs" />
@@ -167,6 +168,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\image.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Liquids_Menu.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Powders_Menu.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

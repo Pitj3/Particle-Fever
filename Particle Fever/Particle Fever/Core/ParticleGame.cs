@@ -28,7 +28,7 @@ namespace Particle_Fever
         private int _diffuseLoc;
 
         // Simulation variables
-        private Simulation _sim;
+        private Simulation _simulation;
 
         // Timing variables
         private Timer _timer = new Timer();
@@ -54,7 +54,7 @@ namespace Particle_Fever
 
             Title = _title;
 
-            _screenBuffer = new ScreenBuffer((uint)_windowSize.X, (uint)_windowSize.Y, (uint)TextureMinFilter.Linear, 4);
+            ScreenBuffer = new ScreenBuffer((uint)_windowSize.X, (uint)_windowSize.Y, (uint)TextureMinFilter.Nearest, 4);
 
             GL.ClearColor(Color.MidnightBlue);
             GLRenderer.Initialize();
@@ -68,16 +68,11 @@ namespace Particle_Fever
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.Uniform1(_diffuseLoc, 0);
 
-            _sim = new Simulation();
+            Simulation = new Simulation();
 
             _screenQuad = new QuadPrimitive(0, 0, (uint)_windowSize.X, (uint)_windowSize.Y);
 
-            for(uint i = 20; i < 200; i++)
-            {
-                _screenBuffer.SetPixel(i, 200, 0xFF00FFFF);
-            }
-
-            _controller = new Controller();
+            Controller = new Controller();
 
             _interface = new InterfaceManager();
             _interface.OnLoad(e);
@@ -97,8 +92,8 @@ namespace Particle_Fever
             Input.OnUpdateFrame(e);
 
             _interface.OnUpdateFrame(e);
-            _controller.OnUpdateFrame(e);
-            _sim.OnUpdateFrame(e);
+            Controller.OnUpdateFrame(e);
+            Simulation.OnUpdateFrame(e);
 
             if (Input.IsKeyPressed(Key.Escape))
                 Close();
@@ -110,21 +105,15 @@ namespace Particle_Fever
 
             GLRenderer.OnBeginRenderFrame();
 
-            _controller.OnRenderFrame(e);
+            Controller.OnRenderFrame(e);
             Input.OnRenderFrame(e);
 
             // Begin rendering to screenbuffer
-            _screenBuffer.OnBeginRenderFrame();
+            ScreenBuffer.OnBeginRenderFrame();
 
-            // render particles
-            for (uint i = 20; i < 200; i++)
-            {
-                _screenBuffer.SetPixel(i, 200, 0xFFFFFFFF);
-            }
+            Simulation.OnRenderFrame(e);
 
-            _sim.OnRenderFrame(e);
-
-            _screenBuffer.OnEndRenderFrame();
+            ScreenBuffer.OnEndRenderFrame();
             // End rendering to screenbuffer
 
             // Render screenquad with screenbuffer texture
@@ -175,6 +164,45 @@ namespace Particle_Fever
             set
             {
                 _windowSize = value;
+            }
+        }
+
+        public Controller Controller
+        {
+            get
+            {
+                return _controller;
+            }
+
+            set
+            {
+                _controller = value;
+            }
+        }
+
+        public ScreenBuffer ScreenBuffer
+        {
+            get
+            {
+                return _screenBuffer;
+            }
+
+            set
+            {
+                _screenBuffer = value;
+            }
+        }
+
+        public Simulation Simulation
+        {
+            get
+            {
+                return _simulation;
+            }
+
+            set
+            {
+                _simulation = value;
             }
         }
     }

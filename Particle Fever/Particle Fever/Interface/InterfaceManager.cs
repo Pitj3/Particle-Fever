@@ -21,6 +21,13 @@ namespace Particle_Fever
 
         // Interface variables
         private Matrix4 _canvasMatrix;
+        private Gwen.Control.Label _currentElementLabel;
+
+        // Menu variables
+        private Gwen.Control.GroupBox _bottomMenuBox;
+        private Gwen.Control.GroupBox _sideMenuBox;
+
+        public delegate void ButtonFunction();
 
         public Gwen.Control.Canvas Canvas
         {
@@ -68,13 +75,50 @@ namespace Particle_Fever
 
             SetupInputEvents();
 
-            // add interface items
-            Gwen.Control.ImagePanel _image = new Gwen.Control.ImagePanel(_canvas);
-            _image.ImageName = "Content/image.png";
-            _image.SetUV(0, 0, 1, 1);
-            _image.SetSize(64, 64);
-            _image.Position(Gwen.Pos.Center);
-            _image.SetToolTipText("Image");
+            _sideMenuBox = new Gwen.Control.GroupBox(_canvas);
+            _sideMenuBox.SetSize(80, 128);
+            _sideMenuBox.Position(Gwen.Pos.Center);
+            _sideMenuBox.Position(Gwen.Pos.Right, 5);
+
+            LoadElementCatagories();
+
+            // Current element text
+            _currentElementLabel = new Gwen.Control.Label(_canvas);
+            _currentElementLabel.SetPosition(10, 10);
+            _currentElementLabel.SetSize(100, 40);
+            _currentElementLabel.SetText("");
+
+            // Bottom menu
+            _bottomMenuBox = new Gwen.Control.GroupBox(_canvas);
+            _bottomMenuBox.SetSize(800, 36);
+            
+            _bottomMenuBox.Position(Gwen.Pos.Center);
+            _bottomMenuBox.Position(Gwen.Pos.Bottom);
+            _bottomMenuBox.ShouldDrawBackground = true;
+
+        }
+
+        private void LoadElementCatagories()
+        {
+            Gwen.Control.Button _powdersButton = new Gwen.Control.Button(_sideMenuBox);
+
+            _powdersButton.Font.Size = 8;
+            _powdersButton.SetSize(80, 20);
+            _powdersButton.SetToolTipText("Powders");
+            _powdersButton.SetText("Powders");
+            _powdersButton.SetPosition(0, 0);
+            _powdersButton.Name = "PowdersMenu";
+            _powdersButton.Clicked += OnButtonClick;
+
+            Gwen.Control.Button _liquidsButton = new Gwen.Control.Button(_sideMenuBox);
+
+            _liquidsButton.Font.Size = 8;
+            _liquidsButton.SetSize(80, 20);
+            _liquidsButton.SetToolTipText("Liquids");
+            _liquidsButton.SetText("Liquids");
+            _liquidsButton.SetPosition(0, 22);
+            _liquidsButton.Name = "LiquidsMenu";
+            _liquidsButton.Clicked += OnButtonClick;
         }
 
         public void OnRenderFrame(FrameEventArgs e)
@@ -85,6 +129,64 @@ namespace Particle_Fever
         public void OnUpdateFrame(FrameEventArgs e)
         {
 
+        }
+
+        public void OnButtonClick(Gwen.Control.Base sender, Gwen.Control.ClickedEventArgs e)
+        {
+            if(sender.Name.Contains("Menu"))
+            {
+                OpenMenu(sender.Name);
+                return;
+            }
+
+            if(sender.Name.Contains("Element"))
+            {
+                SetElement(sender.Name);
+            }
+        }
+
+        private void SetElement(string name)
+        {
+            string elementName = name.Substring(0, name.Length - "Element".Length);
+            _currentElementLabel.SetText(elementName);
+
+            Program.Game.Controller.SetElement(elementName);
+        }
+
+        private void OpenMenu(string name)
+        {
+            switch(name)
+            {
+                case "PowdersMenu":
+                {
+                    LoadPowders();
+                    break;
+                }
+
+                case "LiquidsMenu":
+                {
+                    LoadLiquids();
+                    break;
+                }
+            }
+        }
+
+        private void LoadLiquids()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void LoadPowders()
+        {
+            _bottomMenuBox.DeleteAllChildren();
+            Gwen.Control.Button _sandButton = new Gwen.Control.Button(_bottomMenuBox);
+            _sandButton.Font.Size = 12;
+            _sandButton.SetSize(80, 28);
+            _sandButton.SetText("Sand");
+            _sandButton.SetToolTipText("Sand");
+            _sandButton.SetPosition(2, 7);
+            _sandButton.Name = "SandElement";
+            _sandButton.Clicked += OnButtonClick;
         }
 
         public void SetupInputEvents()

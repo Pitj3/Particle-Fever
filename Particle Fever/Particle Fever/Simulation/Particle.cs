@@ -6,17 +6,12 @@ using System.Threading.Tasks;
 
 namespace Particle_Fever
 {
-    public enum ParticleType
-    {
-        PARTICLE_SAND = 0
-    }
 
     public struct Particle
     {
-        int x, y, vx, vy;
-        int oldx, oldy;
-        uint color;
-        int life;
-        ParticleType type;
+        public int x, y, vx, vy;
+        public int oldx, oldy;
+        public uint color;
+        public int life;
     }
 }

@@ -11,7 +11,7 @@ namespace Particle_Fever
 {
     public class Input
     {
-        public enum KeyState
+        public enum ButtonState
         {
             PRESSED = 0,
             DOWN,
@@ -19,8 +19,12 @@ namespace Particle_Fever
             NONE
         }
 
-        private static KeyState[] _keys;
-        private static bool[] _hasBeenReleased;
+        private static ButtonState[] _keys;
+        private static ButtonState[] _mousebuttons;
+        private static bool[] _hasKeyBeenReleased;
+        private static bool[] _hasMouseBeenReleased;
+
+        private static Vector2 _mousePosition;
 
         public Input()
         {
@@ -29,13 +33,22 @@ namespace Particle_Fever
 
         public static void OnLoad(EventArgs e)
         {
-            _keys = new KeyState[(int)Key.LastKey];
-            _hasBeenReleased = new bool[(int)Key.LastKey];
+            _keys = new ButtonState[(int)Key.LastKey];
+            _mousebuttons = new ButtonState[(int)MouseButton.LastButton];
+
+            _hasKeyBeenReleased = new bool[(int)Key.LastKey];
+            _hasMouseBeenReleased = new bool[(int)MouseButton.LastButton];
 
             for (int i = 0; i < (int)Key.LastKey; i++)
             {
-                _keys[i] = KeyState.NONE;
-                _hasBeenReleased[i] = false;
+                _keys[i] = ButtonState.NONE;
+                _hasKeyBeenReleased[i] = false;
+            }
+
+            for (int i = 0; i < (int)MouseButton.LastButton; i++)
+            {
+                _mousebuttons[i] = ButtonState.NONE;
+                _hasMouseBeenReleased[i] = false;
             }
 
             SetupInputEvents();
@@ -50,35 +63,67 @@ namespace Particle_Fever
         {
             for (int i = 0; i < (int)Key.LastKey; i++)
             {
-                if (_keys[i] == KeyState.PRESSED)
+                if (_keys[i] == ButtonState.PRESSED)
                 {
-                    if (!_hasBeenReleased[i])
+                    if (!_hasKeyBeenReleased[i])
                     {
-                        _keys[i] = KeyState.DOWN;
+                        _keys[i] = ButtonState.DOWN;
                     }
                 }
 
-                if (_keys[i] == KeyState.UP)
-                    _keys[i] = KeyState.NONE;
+                if (_keys[i] == ButtonState.UP)
+                    _keys[i] = ButtonState.NONE;
 
-                if (_hasBeenReleased[i])
-                    _hasBeenReleased[i] = false;
+                if (_hasKeyBeenReleased[i])
+                    _hasKeyBeenReleased[i] = false;
+            }
+
+            for (int i = 0; i < (int)MouseButton.LastButton; i++)
+            {
+                if (_mousebuttons[i] == ButtonState.PRESSED)
+                {
+                    if (!_hasMouseBeenReleased[i])
+                    {
+                        _mousebuttons[i] = ButtonState.DOWN;
+                    }
+                }
+
+                if (_mousebuttons[i] == ButtonState.UP)
+                    _mousebuttons[i] = ButtonState.NONE;
+
+                if (_hasMouseBeenReleased[i])
+                    _hasMouseBeenReleased[i] = false;
             }
         }
 
         public static bool IsKeyDown(Key key)
         {
-            return _keys[(int)key] == KeyState.DOWN || _keys[(int)key] == KeyState.PRESSED;
+            return _keys[(int)key] == ButtonState.DOWN || _keys[(int)key] == ButtonState.PRESSED;
         }
 
         public static bool IsKeyPressed(Key key)
         {
-            return _keys[(int)key] == KeyState.PRESSED;
+            return _keys[(int)key] == ButtonState.PRESSED;
         }
 
         public static bool IsKeyUp(Key key)
         {
-            return _keys[(int)key] == KeyState.UP;
+            return _keys[(int)key] == ButtonState.UP;
+        }
+
+        public static bool IsMouseButtonDown(MouseButton button)
+        {
+            return _mousebuttons[(int)button] == ButtonState.DOWN || _mousebuttons[(int)button] == ButtonState.PRESSED;
+        }
+
+        public static bool IsMouseButtonPressed(MouseButton button)
+        {
+            return _mousebuttons[(int)button] == ButtonState.PRESSED;
+        }
+
+        public static bool IsMouseButtonUp(MouseButton button)
+        {
+            return _mousebuttons[(int)button] == ButtonState.UP;
         }
 
         private static void SetupInputEvents()
@@ -95,42 +140,67 @@ namespace Particle_Fever
 
         private static void Keyboard_KeyDown(object sender, KeyboardKeyEventArgs e)
         {
-            if (_keys[(int)e.Key] == KeyState.PRESSED)
+            if (_keys[(int)e.Key] == ButtonState.PRESSED)
             {
-                _keys[(int)e.Key] = KeyState.DOWN;
+                _keys[(int)e.Key] = ButtonState.DOWN;
                 return;
             }
-            if(_keys[(int)e.Key] == KeyState.NONE)
+            if(_keys[(int)e.Key] == ButtonState.NONE)
             {
-                _keys[(int)e.Key] = KeyState.PRESSED;
+                _keys[(int)e.Key] = ButtonState.PRESSED;
                 return;
             }
         }
 
         private static void Keyboard_KeyUp(object sender, KeyboardKeyEventArgs e)
         {
-            _keys[(int)e.Key] = KeyState.UP;
-            _hasBeenReleased[(int)e.Key] = true;
+            _keys[(int)e.Key] = ButtonState.UP;
+            _hasKeyBeenReleased[(int)e.Key] = true;
         }
 
-        private static void Mouse_ButtonDown(object sender, MouseButtonEventArgs args)
+        private static void Mouse_ButtonDown(object sender, MouseButtonEventArgs e)
         {
-            
+            _mousePosition = new Vector2(e.X, e.Y);
+            if (_mousebuttons[(int)e.Button] == ButtonState.PRESSED)
+            {
+                _mousebuttons[(int)e.Button] = ButtonState.DOWN;
+                return;
+            }
+            if (_mousebuttons[(int)e.Button] == ButtonState.NONE)
+            {
+                _mousebuttons[(int)e.Button] = ButtonState.PRESSED;
+                return;
+            }
         }
 
-        private static void Mouse_ButtonUp(object sender, MouseButtonEventArgs args)
+        private static void Mouse_ButtonUp(object sender, MouseButtonEventArgs e)
         {
-            
+            _mousePosition = new Vector2(e.X, e.Y);
+            _mousebuttons[(int)e.Button] = ButtonState.UP;
+            _hasMouseBeenReleased[(int)e.Button] = true;
         }
 
-        private static void Mouse_Move(object sender, MouseMoveEventArgs args)
+        private static void Mouse_Move(object sender, MouseMoveEventArgs e)
         {
-            
+            _mousePosition = new Vector2(e.X, e.Y);
         }
 
         private static void Mouse_Wheel(object sender, MouseWheelEventArgs args)
         {
             
+        }
+
+        public static Vector2 MousePosition
+        {
+            get
+            {
+                return _mousePosition;
+            }
+
+            set
+            {
+                _mousePosition = value;
+            }
         }
     }
 }
